@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState,useEffect } from 'react';
 import Box from 'components/Box';
 import Modal from 'components/Modal';
 import Loader from 'components/Loader';
@@ -8,64 +8,60 @@ import ImageGallery from 'components/ImageGallery';
 
 const axios = require('axios');
 
-class App extends Component {
-  state = {
-    showModal: false,
-    showLoader: false,
-    searchQuery: '',
-    currentPage: 1,
-    totalPage: 1,
-    BASE_URL: 'https://pixabay.com/api',
-    API_KEY: '27704892-de5059e1c4b826ebc44d6e413',
-    pageItem: 20,
-    totalHits: 0,
-    images: [],
-    modalImage: '',
-    modalTags: '',
+function App() {
+  const [showModal, setShowModal] = useState(false);
+  const [showLoader, setShowLoader] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+  const [BASE_URL, setBASE_URL] = useState('https://pixabay.com/api');
+  const [API_KEY, setAPI_KEY] = useState('27704892-de5059e1c4b826ebc44d6e413');
+  const [pageItem, setPageItem] = useState(20);
+  const [totalHits, setTotalHits] = useState(0);
+  const [images, setImages] = useState([]);
+  const [modalImage, setModalImage] = useState('');
+  const [modalTags, setModalTags] = useState('');
+
+
+  useEffect(() => {
+    fetchImages();
+  }, [searchQuery,currentPage]);
+
+
+
+  const handlePageNext = () => {
+    setCurrentPage(state => state + 1);
   };
 
-  componentDidUpdate(_, prevState) {
-    if (
-      prevState.searchQuery !== this.state.searchQuery ||
-      prevState.currentPage !== this.state.currentPage
-    ) {
-      this.fetchImages();
-    }
-  }
-
-  handlePageNext = () => {
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-    }));
-  };
-
-  handleSubmit = ({ searchQueryForm }, { resetForm }) => {
-    if (searchQueryForm !== '' && searchQueryForm !== this.state.searchQuery) {
-      this.setState({ searchQuery: searchQueryForm, currentPage: 1 });
+  const handleSubmit = ({ searchQueryForm }, { resetForm }) => {
+    if (searchQueryForm !== '' && searchQueryForm !== searchQuery) {
+      setCurrentPage(1);
+      setSearchQuery(searchQueryForm);
+      
     }
     // resetForm();
   };
-  toggleModal = (image, tags) => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-    this.setState({ modalImage: image, modalTags: tags });
+  const toggleModal = (image, tags) => {
+    setShowModal(state => !state);
+    setModalImage(image);
+    setModalTags(tags);
   };
 
-  async fetchImages() {
-    this.setState({ showLoader: true });
-    const { searchQuery, currentPage, BASE_URL, API_KEY, pageItem } =
-      this.state;
+  async function fetchImages() {
+
+  
+
+
+    setShowLoader(true);
 
     try {
       const url = `${BASE_URL}/?key=${API_KEY}&q=${searchQuery}&image_type=photo&per_page=${pageItem}&page=${currentPage}`;
       const resp = await axios.get(url);
 
       if (currentPage === 1) {
-        this.setState({ totalHits: resp.data.totalHits });
-        this.setState({
-          totalPage: Math.ceil(resp.data.totalHits / this.state.pageItem),
-        });
+        setTotalHits(resp.data.totalHits);
+        setTotalPage(Math.ceil(resp.data.totalHits / pageItem));
+
       }
       const imagehttp = resp.data.hits.map(
         ({ id, largeImageURL, webformatURL, tags }) => {
@@ -79,50 +75,41 @@ class App extends Component {
       );
 
       if (resp.data.totalHits !== 0) {
-        this.setState(prevState => ({
-          images:
-            this.state.currentPage > 1
-              ? [...prevState.images, ...imagehttp]
-              : [...imagehttp],
-        }));
+
+        setImages(state =>    
+          currentPage > 1
+          ? [...state, ...imagehttp]
+          : [...imagehttp],);
+
       } else {
-        this.setState({ images: [] });
-      }
+        setImages([]);    
+        }
     } catch (err) {
       console.error('axiosget error');
     } finally {
-      this.setState({ showLoader: false });
+      setShowLoader(false);
     }
   }
 
-  render() {
-    const {
-      showModal,
-      showLoader,
-      images,
-      modalImage,
-      modalTags,
-      currentPage,
-      totalPage,
-    } = this.state;
+
     return (
       <Box position="relative" as="main">
-        <Searchbar onSubmit={this.handleSubmit} />
+        <Searchbar onSubmit={handleSubmit} />
 
         {images.length > 0 && (
           <ImageGallery
             images={images}
-            toggleModal={this.toggleModal}
+            toggleModal={toggleModal}
           ></ImageGallery>
         )}
         {currentPage < totalPage && (
           <Box textAlign="center">
-            <Button onClick={this.handlePageNext}>Load more</Button>
+            <Button onClick={handlePageNext}>Load more</Button>
           </Box>
         )}
 
         {showModal && (
-          <Modal onClose={this.toggleModal}>
+          <Modal onClose={toggleModal}>
             {' '}
             <img src={modalImage} alt={modalTags} />
           </Modal>
@@ -130,7 +117,7 @@ class App extends Component {
         {showLoader && <Loader />}
       </Box>
     );
-  }
-}
+
+};
 
 export default App;
