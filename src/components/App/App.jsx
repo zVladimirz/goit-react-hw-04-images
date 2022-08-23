@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Box from 'components/Box';
 import Modal from 'components/Modal';
 import Loader from 'components/Loader';
@@ -22,12 +22,9 @@ function App() {
   const [modalImage, setModalImage] = useState('');
   const [modalTags, setModalTags] = useState('');
 
-
   useEffect(() => {
     fetchImages();
-  }, [searchQuery,currentPage]);
-
-
+  }, [searchQuery, currentPage]);
 
   const handlePageNext = () => {
     setCurrentPage(state => state + 1);
@@ -37,7 +34,6 @@ function App() {
     if (searchQueryForm !== '' && searchQueryForm !== searchQuery) {
       setCurrentPage(1);
       setSearchQuery(searchQueryForm);
-      
     }
     // resetForm();
   };
@@ -48,10 +44,6 @@ function App() {
   };
 
   async function fetchImages() {
-
-  
-
-
     setShowLoader(true);
 
     try {
@@ -61,7 +53,6 @@ function App() {
       if (currentPage === 1) {
         setTotalHits(resp.data.totalHits);
         setTotalPage(Math.ceil(resp.data.totalHits / pageItem));
-
       }
       const imagehttp = resp.data.hits.map(
         ({ id, largeImageURL, webformatURL, tags }) => {
@@ -75,15 +66,12 @@ function App() {
       );
 
       if (resp.data.totalHits !== 0) {
-
-        setImages(state =>    
-          currentPage > 1
-          ? [...state, ...imagehttp]
-          : [...imagehttp],);
-
+        setImages(state =>
+          currentPage > 1 ? [...state, ...imagehttp] : [...imagehttp]
+        );
       } else {
-        setImages([]);    
-        }
+        setImages([]);
+      }
     } catch (err) {
       console.error('axiosget error');
     } finally {
@@ -91,33 +79,28 @@ function App() {
     }
   }
 
+  return (
+    <Box position="relative" as="main">
+      <Searchbar onSubmit={handleSubmit} />
 
-    return (
-      <Box position="relative" as="main">
-        <Searchbar onSubmit={handleSubmit} />
+      {images.length > 0 && (
+        <ImageGallery images={images} toggleModal={toggleModal}></ImageGallery>
+      )}
+      {currentPage < totalPage && (
+        <Box textAlign="center">
+          <Button onClick={handlePageNext}>Load more</Button>
+        </Box>
+      )}
 
-        {images.length > 0 && (
-          <ImageGallery
-            images={images}
-            toggleModal={toggleModal}
-          ></ImageGallery>
-        )}
-        {currentPage < totalPage && (
-          <Box textAlign="center">
-            <Button onClick={handlePageNext}>Load more</Button>
-          </Box>
-        )}
-
-        {showModal && (
-          <Modal onClose={toggleModal}>
-            {' '}
-            <img src={modalImage} alt={modalTags} />
-          </Modal>
-        )}
-        {showLoader && <Loader />}
-      </Box>
-    );
-
-};
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          {' '}
+          <img src={modalImage} alt={modalTags} />
+        </Modal>
+      )}
+      {showLoader && <Loader />}
+    </Box>
+  );
+}
 
 export default App;
