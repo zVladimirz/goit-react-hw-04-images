@@ -14,15 +14,49 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-  const [BASE_URL, setBASE_URL] = useState('https://pixabay.com/api');
-  const [API_KEY, setAPI_KEY] = useState('27704892-de5059e1c4b826ebc44d6e413');
-  const [pageItem, setPageItem] = useState(20);
-  const [totalHits, setTotalHits] = useState(0);
+  const BASE_URL = 'https://pixabay.com/api';
+  const API_KEY = '27704892-de5059e1c4b826ebc44d6e413';
+  const pageItem = 20;
   const [images, setImages] = useState([]);
   const [modalImage, setModalImage] = useState('');
   const [modalTags, setModalTags] = useState('');
 
   useEffect(() => {
+    async function fetchImages() {
+      setShowLoader(true);
+  
+      try {
+        const url = `${BASE_URL}/?key=${API_KEY}&q=${searchQuery}&image_type=photo&per_page=${pageItem}&page=${currentPage}`;
+        const resp = await axios.get(url);
+  
+        if (currentPage === 1) {
+          setTotalPage(Math.ceil(resp.data.totalHits / pageItem));
+        }
+        const imagehttp = resp.data.hits.map(
+          ({ id, largeImageURL, webformatURL, tags }) => {
+            return {
+              id,
+              largeImageURL,
+              webformatURL,
+              tags,
+            };
+          }
+        );
+  
+        if (resp.data.totalHits !== 0) {
+          setImages(state =>
+            currentPage > 1 ? [...state, ...imagehttp] : [...imagehttp]
+          );
+        } else {
+          setImages([]);
+        }
+      } catch (err) {
+        console.error('axiosget error');
+      } finally {
+        setShowLoader(false);
+      }
+    }
+
     fetchImages();
   }, [searchQuery, currentPage]);
 
@@ -43,41 +77,7 @@ function App() {
     setModalTags(tags);
   };
 
-  async function fetchImages() {
-    setShowLoader(true);
 
-    try {
-      const url = `${BASE_URL}/?key=${API_KEY}&q=${searchQuery}&image_type=photo&per_page=${pageItem}&page=${currentPage}`;
-      const resp = await axios.get(url);
-
-      if (currentPage === 1) {
-        setTotalHits(resp.data.totalHits);
-        setTotalPage(Math.ceil(resp.data.totalHits / pageItem));
-      }
-      const imagehttp = resp.data.hits.map(
-        ({ id, largeImageURL, webformatURL, tags }) => {
-          return {
-            id,
-            largeImageURL,
-            webformatURL,
-            tags,
-          };
-        }
-      );
-
-      if (resp.data.totalHits !== 0) {
-        setImages(state =>
-          currentPage > 1 ? [...state, ...imagehttp] : [...imagehttp]
-        );
-      } else {
-        setImages([]);
-      }
-    } catch (err) {
-      console.error('axiosget error');
-    } finally {
-      setShowLoader(false);
-    }
-  }
 
   return (
     <Box position="relative" as="main">
