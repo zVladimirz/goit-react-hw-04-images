@@ -86,7 +86,7 @@ function App() {
       )}
       {currentPage < totalPage && (
         <Box textAlign="center">
-          <Button onClick={handlePageNext}>Load more</Button>
+          <Button onClick={handlePageNext}>Load more (page {currentPage} of {totalPage})</Button>
         </Box>
       )}
 
