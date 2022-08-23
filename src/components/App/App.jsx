@@ -24,11 +24,11 @@ function App() {
   useEffect(() => {
     async function fetchImages() {
       setShowLoader(true);
-  
+
       try {
         const url = `${BASE_URL}/?key=${API_KEY}&q=${searchQuery}&image_type=photo&per_page=${pageItem}&page=${currentPage}`;
         const resp = await axios.get(url);
-  
+
         if (currentPage === 1) {
           setTotalPage(Math.ceil(resp.data.totalHits / pageItem));
         }
@@ -42,7 +42,7 @@ function App() {
             };
           }
         );
-  
+
         if (resp.data.totalHits !== 0) {
           setImages(state =>
             currentPage > 1 ? [...state, ...imagehttp] : [...imagehttp]
@@ -76,8 +76,6 @@ function App() {
     setModalImage(image);
     setModalTags(tags);
   };
-
-
 
   return (
     <Box position="relative" as="main">
