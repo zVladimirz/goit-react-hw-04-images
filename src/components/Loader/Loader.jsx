@@ -1,15 +1,14 @@
-import React, { Component } from 'react';
+
 import { createPortal } from 'react-dom';
 import { Audio } from 'react-loader-spinner';
 import { LoaderBackdrop, LoaderContent } from './Loader.styled';
 
 const modalRoot = document.querySelector('#loader-root');
 
-export default class Loader extends Component {
+  
+export default function Loader() {
 
-
-  render() {
-    return createPortal(
+    return (createPortal(
       <LoaderBackdrop>
         <LoaderContent>
           <Audio
@@ -22,6 +21,6 @@ export default class Loader extends Component {
         </LoaderContent>
       </LoaderBackdrop>,
       modalRoot
-    );
-  }
+    ));
+  
 }
