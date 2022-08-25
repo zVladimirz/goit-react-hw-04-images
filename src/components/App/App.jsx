@@ -56,7 +56,9 @@ function App() {
         setShowLoader(false);
       }
     }
-
+    if (searchQuery === '') {
+      return;
+    }
     fetchImages();
   }, [searchQuery, currentPage]);
 
@@ -86,7 +88,9 @@ function App() {
       )}
       {currentPage < totalPage && (
         <Box textAlign="center">
-          <Button onClick={handlePageNext}>Load more (page {currentPage} of {totalPage})</Button>
+          <Button onClick={handlePageNext}>
+            Load more (page {currentPage} of {totalPage})
+          </Button>
         </Box>
       )}
 
